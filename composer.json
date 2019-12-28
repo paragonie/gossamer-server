@@ -1,0 +1,44 @@
+{
+  "name": "paragonie/gossamer-server",
+  "authors": [
+    {
+      "name": "Paragon Initiative Enterprises",
+      "email": "security@paragonie.com",
+      "homepage": "https://paragonie.com"
+    }
+  ],
+  "description": "Standalone REST API server for retrieving updates.",
+  "autoload": {
+    "files": [
+      "src/functions.php"
+    ],
+    "psr-4": {
+      "ParagonIE\\GossamerServer\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "ParagonIE\\GossamerServer\\Tests\\": "tests/"
+    }
+  },
+  "license": "ISC",
+  "require": {
+    "php": "^7.3|^8",
+    "guzzlehttp/guzzle": "^6",
+    "guzzlehttp/psr7": "^1",
+    "nikic/fast-route": "^1",
+    "paragonie/libgossamer": "dev-master",
+    "psr/http-message": "^1"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^3|^4|^5|^6|^7",
+    "vimeo/psalm": "^3"
+  },
+  "scripts": {
+    "full-test": "phpunit && psalm",
+    "start": "php -S 0.0.0.0:8998 -t public public/index.php",
+    "static-analysis": "psalm",
+    "test": "phpunit"
+  },
+  "type": "project"
+}

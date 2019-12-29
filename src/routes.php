@@ -20,6 +20,7 @@ return simpleDispatcher(function (RouteCollector $r) {
         $r->get('/providers', ProviderList::class);
         $r->get('/verification-keys/{provider:[A-Za-z0-9\-_]+}', ProviderKeys::class);
         $r->get('/', GossamerHome::class);
+        $r->get('', GossamerHome::class);
     });
     $r->get('/', Homepage::class);
 });

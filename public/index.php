@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace ParagonIE\GossamerServer;
 use FastRoute\Dispatcher;
+use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Psr7\ServerRequest;
 use ParagonIE\GossamerServer\Handlers\DefaultHandler;
 
@@ -47,7 +48,9 @@ switch ($routeInfo[0]) {
         $handlerName = $routeInfo[1];
         $vars = $routeInfo[2];
         /** @var HandlerInterface&HandlerTrait $handler */
-        $handler = new $handlerName;
+        $handler = new $handlerName($vars);
         $handler->init($settings);
-        send_response($handler($request));
+        /** @var Response $response */
+        $response = $handler($request);
+        send_response($response);
 }

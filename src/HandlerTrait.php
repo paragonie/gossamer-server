@@ -20,6 +20,14 @@ trait HandlerTrait
     /** @var array $settings */
     protected $settings = [];
 
+    /** @var array $vars */
+    protected $vars;
+
+    public function __construct(array $vars)
+    {
+        $this->vars = $vars;
+    }
+
     /**
      * Construct this Handler from the router.
      *
@@ -74,5 +82,14 @@ trait HandlerTrait
     {
         $headers['content-type'] = 'application/json';
         return new Response($status, $headers, json_encode($data, JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * @param string $uri
+     * @return Response
+     */
+    public function redirect(string $uri): Response
+    {
+        return new Response(302, ['Location' => $uri], $uri);
     }
 }

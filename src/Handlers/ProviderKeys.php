@@ -25,8 +25,20 @@ class ProviderKeys implements HandlerInterface
      */
     public function __invoke(ServerRequestInterface $req): ResponseInterface
     {
-        return $this->json([
-            'error' => 'not implemented'
-        ]);
+        $providerId = $this->db()->cell(
+            "SELECT count(id) FROM gossamer_providers WHERE name = ?",
+            $this->vars['provider'] ?? ''
+        );
+        if (empty($providerId)) {
+            return $this->redirect('/gossamer-api/providers');
+        }
+        return $this->json(
+            $this->db()->run(
+                "SELECT publickey, ledgerhash, metadata 
+                 FROM gossamer_provider_publickeys
+                 WHERE provider = ? AND NOT revoked",
+                $providerId
+            )
+        );
     }
 }

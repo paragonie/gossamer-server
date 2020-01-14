@@ -25,8 +25,22 @@ class ProviderPackages implements HandlerInterface
      */
     public function __invoke(ServerRequestInterface $req): ResponseInterface
     {
-        return $this->json([
-            'error' => 'not implemented'
-        ]);
+        $providerId = $this->db()->cell(
+            "SELECT count(id) FROM gossamer_providers WHERE name = ?",
+            $this->vars['provider'] ?? ''
+        );
+        if (empty($providerId)) {
+            return $this->redirect('/gossamer-api/providers');
+        }
+        $packages = $this->db()->run(
+            "SELECT name FROM gossamer_packages WHERE provider = ?",
+            $providerId
+        );
+        foreach ($packages as $i => $pk) {
+            $packages[$i]['releases-url'] = '/gossamer-api/releases/' .
+                urlencode($this->vars['provider']) . '/' . urlencode($pk['name']);
+        }
+
+        return $this->json($packages);
     }
 }

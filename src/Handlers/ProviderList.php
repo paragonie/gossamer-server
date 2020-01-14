@@ -25,8 +25,9 @@ class ProviderList implements HandlerInterface
      */
     public function __invoke(ServerRequestInterface $req): ResponseInterface
     {
-        return $this->json([
-            'error' => 'not implemented'
-        ]);
+        $providers = $this->db()->run(
+            "SELECT * FROM gossamer_providers ORDER BY name ASC"
+        );
+        return $this->json($providers);
     }
 }

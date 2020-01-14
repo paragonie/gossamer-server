@@ -12,12 +12,16 @@ trait HandlerTrait
 {
     use DbTrait;
 
-    /** @var array $settings */
+    /** @var array<array-key, string|array|bool> $settings */
     protected $settings = [];
 
     /** @var array<array-key, string|array> $vars */
     protected $vars;
 
+    /**
+     * HandlerTrait constructor.
+     * @param array<array-key, string|array> $vars
+     */
     public function __construct(array $vars)
     {
         $this->vars = $vars;
@@ -26,7 +30,7 @@ trait HandlerTrait
     /**
      * Construct this Handler from the router.
      *
-     * @param array $settings
+     * @param array<array-key, string|array|bool> $settings
      * @return HandlerInterface
      */
     public function init(array $settings): HandlerInterface

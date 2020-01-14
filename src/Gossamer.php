@@ -35,8 +35,7 @@ class Gossamer
     }
 
     /**
-     * @return array<array-key, array<string, string>>
-     * @return array
+     * @return array<array-key, array{url: string, public-key: string, trust: string}>
      * @throws CornerInterface
      * @throws \SodiumException
      */
@@ -55,8 +54,11 @@ class Gossamer
                     "than the source Chronicle that messages are directly published on.\n"
                 );
         }
-        /** @var array<array-key, array<string, string>> $chronicles */
+        /** @var array<array-key, array{url: string, public-key: string, trust: string}> $chronicles */
         $chronicles = [];
+        /**
+         * @var array<array-key, string> $data
+         */
         foreach ($this->settings['chronicles'] as $data) {
             $chronicles[] = [
                 'url' =>
@@ -82,7 +84,7 @@ class Gossamer
      */
     protected function getSuperProvider(): string
     {
-        return $this->settings['super-provider'] ?? '';
+        return (string) ($this->settings['super-provider'] ?? '');
     }
 
     /**

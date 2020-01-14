@@ -25,20 +25,25 @@ class ProviderPackages implements HandlerInterface
      */
     public function __invoke(ServerRequestInterface $req): ResponseInterface
     {
+        /** @var string $provider */
+        $provider = $this->vars['provider'] ?? '';
+        /** @var int $providerId */
         $providerId = $this->db()->cell(
             "SELECT count(id) FROM gossamer_providers WHERE name = ?",
-            $this->vars['provider'] ?? ''
+            $provider
         );
         if (empty($providerId)) {
             return $this->redirect('/gossamer-api/providers');
         }
+        /** @var array<array-key, array<string, string>> $packages */
         $packages = $this->db()->run(
             "SELECT name FROM gossamer_packages WHERE provider = ?",
             $providerId
         );
         foreach ($packages as $i => $pk) {
             $packages[$i]['releases-url'] = '/gossamer-api/releases/' .
-                urlencode($this->vars['provider']) . '/' . urlencode($pk['name']);
+                urlencode($provider) . '/' .
+                urlencode($pk['name']);
         }
 
         return $this->json($packages);

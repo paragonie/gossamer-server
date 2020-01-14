@@ -22,7 +22,7 @@ interface HandlerInterface
     /**
      * Construct this Handler from the router.
      *
-     * @param array $settings
+     * @param array<array-key, string|array|bool> $settings
      * @return HandlerInterface
      */
     public function init(array $settings): HandlerInterface;

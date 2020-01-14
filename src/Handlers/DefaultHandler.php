@@ -19,6 +19,7 @@ class DefaultHandler implements HandlerInterface
 {
     use HandlerTrait;
 
+    /** @var int $statusCode */
     protected $statusCode = 200;
 
     /**

@@ -23,10 +23,10 @@ trait DbTrait
     {
         if (!$this->db) {
             $this->db = Factory::create(
-                $this->settings['database']['dsn'] ?? 'sqlite::memory:',
-                $this->settings['database']['username'] ?? '',
-                $this->settings['database']['password'] ?? '',
-                $this->settings['database']['options'] ?? []
+                (string) ($this->settings['database']['dsn'] ?? 'sqlite::memory:'),
+                (string) ($this->settings['database']['username'] ?? ''),
+                (string) ($this->settings['database']['password'] ?? ''),
+                (array) ($this->settings['database']['options'] ?? [])
             );
         }
         return $this->db;

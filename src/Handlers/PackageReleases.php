@@ -25,21 +25,30 @@ class PackageReleases implements HandlerInterface
      */
     public function __invoke(ServerRequestInterface $req): ResponseInterface
     {
+        /** @var string $provider */
+        $provider = $this->vars['provider'] ?? '';
+        
+        /** @var string $package */
+        $package = $this->vars['package'] ?? '';
+
+        /** @var int $providerId */
         $providerId = $this->db()->cell(
             "SELECT count(id) FROM gossamer_providers WHERE name = ?",
-            $this->vars['provider'] ?? ''
+            $provider
         );
         if (empty($providerId)) {
             return $this->redirect('/gossamer-api/providers');
         }
+        /** @var int $packageId */
         $packageId = $this->db()->cell(
             "SELECT name FROM gossamer_packages WHERE provider = ? AND name = ?",
             $providerId,
-            $this->vars['package']
+            $package
         );
         if (empty($packageId)) {
-            return $this->redirect('/gossamer-api/packages/' . $this->vars['provider']);
+            return $this->redirect('/gossamer-api/packages/' . $provider);
         }
+        /** @var array $releases */
         $releases = $this->db()->run(
             "SELECT
                 r.version,

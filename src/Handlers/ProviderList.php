@@ -25,6 +25,7 @@ class ProviderList implements HandlerInterface
      */
     public function __invoke(ServerRequestInterface $req): ResponseInterface
     {
+        /** @var array $providers */
         $providers = $this->db()->run(
             "SELECT * FROM gossamer_providers ORDER BY name ASC"
         );

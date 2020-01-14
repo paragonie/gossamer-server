@@ -1,0 +1,20 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+require_once "preamble.php";
+require_once __DIR__ . '/classes/LocalSettingsBuilder.php';
+
+$builder = LocalSettingsBuilder::fromFile(dirname(__DIR__) . '/local/settings.php');
+
+try {
+    do {
+        $choice = $builder->mainPrompt();
+    } while (!empty($choice));
+    exit(0);
+} catch (\Throwable $ex) {
+    echo $ex->getMessage(), PHP_EOL, PHP_EOL;
+    echo $ex->getTraceAsString(), PHP_EOL;
+    $c = $ex->getCode();
+    exit($c === 0 ? 255 : $c);
+}

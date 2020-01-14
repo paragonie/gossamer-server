@@ -21,9 +21,14 @@
       "ParagonIE\\GossamerServer\\Tests\\": "tests/"
     }
   },
+  "bin": [
+    "bin/configure",
+    "bin/make"
+  ],
   "license": "ISC",
   "require": {
     "php": "^7.3|^8",
+    "ext-json": "*",
     "guzzlehttp/guzzle": "^6",
     "guzzlehttp/psr7": "^1",
     "nikic/fast-route": "^1",

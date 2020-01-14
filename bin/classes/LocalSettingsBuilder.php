@@ -257,7 +257,7 @@ class LocalSettingsBuilder
         if (!is_dir($dir)) {
             throw new Exception("{$dir} is not a directory");
         }
-        $this->settings = [
+        $this->settings['database'] = [
             'dsn' => 'sqlite:' . $path,
             'options' => $this->settings['database']['options'] ?? []
         ];

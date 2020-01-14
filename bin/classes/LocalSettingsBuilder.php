@@ -103,6 +103,10 @@ class LocalSettingsBuilder
             case 'save':
                 $this->save(GOSSAMER_SERVER_ROOT . '/local/settings.php');
                 break;
+            case 'preview':
+                var_export($this->settings);
+                echo PHP_EOL;
+                break;
             case 'exit':
                 return false;
         }
@@ -122,7 +126,9 @@ class LocalSettingsBuilder
         echo ' +----------+-------------------------------------------------+', PHP_EOL;
         echo ' | commands | Show this table of available commands           |', PHP_EOL;
         echo ' | database | Configure the database connection               |', PHP_EOL;
+        echo ' | preview  | View the current configuration state            |', PHP_EOL;
         echo ' | save     | Save the configuration to local/settings.php    |', PHP_EOL;
+        echo ' | exit     | Exit this configuration program                 |', PHP_EOL;
         echo ' +----------+-------------------------------------------------+', PHP_EOL;
         echo PHP_EOL;
     }
@@ -243,11 +249,11 @@ class LocalSettingsBuilder
             ];
             return;
         }
-        $path = $this->prompt('Database file location: ');
+        $path = trim($this->prompt('Database file location: '));
         if (empty($path)) {
             $path = GOSSAMER_SERVER_ROOT . '/local/sqlite.db';
         }
-        $dir = preg_replace('#/.+$#', '', realpath($path));
+        $dir = preg_replace('#/[^/]+$#', '', $path);
         if (!is_dir($dir)) {
             throw new Exception("{$dir} is not a directory");
         }

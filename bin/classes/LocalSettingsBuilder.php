@@ -97,11 +97,19 @@ class LocalSettingsBuilder
             case 'commands':
                 $this->displayBanner();
                 break;
+            case 'chronicle':
+                do {
+                    $again = $this->chronicleSubMenu();
+                } while ($again);
+                break;
             case 'database':
                 $this->configureDatabase();
                 break;
             case 'save':
                 $this->save(GOSSAMER_SERVER_ROOT . '/local/settings.php');
+                break;
+            case 'super':
+                $this->setSuperProvider();
                 break;
             case 'preview':
                 var_export($this->settings);
@@ -115,21 +123,167 @@ class LocalSettingsBuilder
     }
 
     /**
+     * Chronicle Sub-Menu
+     *
+     * @return bool
+     */
+    protected function chronicleSubMenu(): bool
+    {
+        if (empty($this->settings['chronicles'])) {
+            $this->settings['chronicles'] = [];
+        }
+        $this->prompted = false;
+        echo 'Please enter a command from the list below then press ENTER.',
+        PHP_EOL, PHP_EOL;
+        echo ' +----------+-------------------------------------------------+', PHP_EOL;
+        echo ' | Command  | Description                                     |', PHP_EOL;
+        echo ' +----------+-------------------------------------------------+', PHP_EOL;
+        echo ' | add      | Add a Chronicle instance                        |', PHP_EOL;
+        echo ' | done     | Exit this sub-menu                              |', PHP_EOL;
+        echo ' | list     | List Chronicle instances (url, public key)      |', PHP_EOL;
+        echo ' | remove   | Remove a Chronicle instance                     |', PHP_EOL;
+        echo ' +----------+-------------------------------------------------+', PHP_EOL;
+        $prompt = trim($this->prompt('Please enter your command: '));
+        if (empty($prompt)) {
+            return false;
+        }
+
+        switch (strtolower($prompt)) {
+            case 'add':
+                return $this->chronicleAdd();
+            case 'done':
+                return false;
+            case 'list':
+                return $this->chronicleList();
+            case 'remove':
+                return $this->chronicleRemove();
+            default:
+                echo 'Unknown command: ', $prompt, PHP_EOL;
+                return true;
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    protected function chronicleAdd(): bool
+    {
+        $url = trim($this->prompt('Chronicle URL: '));
+        $publicKey = trim($this->prompt('Chronicle Public Key: '));
+        $blindFaith = $this->booleanPrompt('Do you blindly trust this instance? ');
+        $this->settings['chronicles'][] = [
+            'url' => $url,
+            'public-key' => $publicKey,
+            'blind-faith' => $blindFaith
+        ];
+        return true;
+    }
+
+    /**
+     * @return bool
+     */
+    protected function chronicleList(): bool
+    {
+        $count = count($this->settings['chronicles']);
+        if ($count < 1) {
+            echo 'There are no Chronicle instances configured.', PHP_EOL;
+            return true;
+        }
+        if ($count > 20) {
+            // Paginate
+            $cursor = 0;
+            do {
+                $this->chronicleViewSubset($cursor, $cursor + 20);
+                echo '(p=previous, n=next, x=exit)', PHP_EOL;
+                $input = strtolower($this->prompt('Please enter a command: '));
+                switch ($input) {
+                    case 'p':
+                    case 'prev':
+                    case 'previous':
+                        $cursor -= 20;
+                        if ($cursor < 0) {
+                            $cursor = 0;
+                        }
+                        break;
+                    case 'n':
+                    case 'next':
+                        $cursor += 20;
+                        if ($cursor >= $count) {
+                            $cursor -= ($count % 20);
+                        }
+                }
+            } while (!in_array($input, ['x', 'exit']));
+        } else {
+            $this->chronicleViewSubset(0, $count);
+        }
+        return true;
+    }
+
+    /**
+     * Print out a subset of the Chronicles configured.
+     *
+     * @param int $start
+     * @param int $length
+     */
+    protected function chronicleViewSubset(int $start, int $length): void
+    {
+        $count = count($this->settings['chronicles']);
+        if ($start + $length > $count) {
+            $length = $count - $start;
+        }
+        $slice = array_slice($this->settings['chronicles'], $start, $length);
+        $n = $start + 1;
+        echo "Showing {$n} through " . ($start + $length) . " of {$count} instances.\n\n";
+        foreach ($slice as $row) {
+            echo "\t{$n}\t{$row['url']}\t{$row['public-key']}";
+            if (!empty($row['blind-faith'])) {
+                echo "\t[Blind Faith]";
+            }
+            echo PHP_EOL;
+            ++$n;
+        }
+        echo "\n";
+    }
+
+    /**
+     * @return bool
+     */
+    protected function chronicleRemove(): bool
+    {
+        if ($this->booleanPrompt('Do you need to lookup the ID of the Chronicle to remove? ')) {
+            $this->chronicleList();
+        }
+        $index = trim($this->prompt('Which Chronicle do you wish to remove? '));
+        if (!preg_match('/^\d+$/', $index)) {
+            return true;
+        }
+        if ($index < 1 || $index > count($this->settings['chronicles'])) {
+            echo 'Index not found: ', $index, PHP_EOL;
+            return true;
+        }
+        unset($this->settings['chronicles'][$index - 1]);
+        $this->settings['chronicles'] = array_values($this->settings['chronicles']);
+        return true;
+    }
+
+    /**
      * Display the banner.
      */
     protected function displayBanner(): void
     {
         echo 'Please enter a command from the list below then press ENTER.',
             PHP_EOL, PHP_EOL;
-        echo ' +----------+-------------------------------------------------+', PHP_EOL;
-        echo ' | Command  | Description                                     |', PHP_EOL;
-        echo ' +----------+-------------------------------------------------+', PHP_EOL;
-        echo ' | commands | Show this table of available commands           |', PHP_EOL;
-        echo ' | database | Configure the database connection               |', PHP_EOL;
-        echo ' | preview  | View the current configuration state            |', PHP_EOL;
-        echo ' | save     | Save the configuration to local/settings.php    |', PHP_EOL;
-        echo ' | exit     | Exit this configuration program                 |', PHP_EOL;
-        echo ' +----------+-------------------------------------------------+', PHP_EOL;
+        echo ' +-----------+------------------------------------------------+', PHP_EOL;
+        echo ' | Command   | Description                                    |', PHP_EOL;
+        echo ' +-----------+------------------------------------------------+', PHP_EOL;
+        echo ' | chronicle | Add/remove Chronicle instances                 |', PHP_EOL;
+        echo ' | commands  | Show this table of available commands          |', PHP_EOL;
+        echo ' | database  | Configure the database connection              |', PHP_EOL;
+        echo ' | preview   | View the current configuration state           |', PHP_EOL;
+        echo ' | save      | Save the configuration to local/settings.php   |', PHP_EOL;
+        echo ' | super     | Set the "Super Provider"                       |', PHP_EOL;
+        echo ' | exit      | Exit this configuration program                |', PHP_EOL;
+        echo ' +-----------+------------------------------------------------+', PHP_EOL;
         echo PHP_EOL;
     }
 
@@ -261,6 +415,33 @@ class LocalSettingsBuilder
             'dsn' => 'sqlite:' . $path,
             'options' => $this->settings['database']['options'] ?? []
         ];
+    }
+
+    /**
+     * Set the Super Provider.
+     */
+    protected function setSuperProvider(): void
+    {
+        if (!empty($this->settings['super-provider'])) {
+            echo 'The current super-provider is: ',
+                $this->settings['super-provider'], PHP_EOL;
+            if ($this->booleanPrompt('Is this OK? ')) {
+                return;
+            }
+            if ($this->booleanPrompt('Remove the super provider? ')) {
+                $this->settings['super-provider'] = '';
+                return;
+            }
+        } else {
+            echo 'There is no super provider configured.', PHP_EOL;
+            if ($this->booleanPrompt('Is this OK? ')) {
+                return;
+            }
+        }
+        do {
+            $super = trim($this->prompt('Please enter the name of the new Super Provider: '));
+        } while (empty($super));
+        $this->settings['super-provider'] = $super;
     }
 
     /**

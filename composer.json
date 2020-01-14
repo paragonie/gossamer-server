@@ -23,7 +23,8 @@
   },
   "bin": [
     "bin/configure",
-    "bin/make"
+    "bin/make",
+    "bin/sync"
   ],
   "license": "ISC",
   "require": {

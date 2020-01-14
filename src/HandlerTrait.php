@@ -3,10 +3,6 @@ declare(strict_types=1);
 namespace ParagonIE\GossamerServer;
 
 use GuzzleHttp\Psr7\Response;
-use ParagonIE\EasyDB\{
-    EasyDB,
-    Factory
-};
 
 /**
  * Trait HandlerTrait
@@ -14,13 +10,12 @@ use ParagonIE\EasyDB\{
  */
 trait HandlerTrait
 {
-    /** @var ?EasyDB $db */
-    protected $db;
+    use DbTrait;
 
     /** @var array $settings */
     protected $settings = [];
 
-    /** @var array $vars */
+    /** @var array<array-key, string|array> $vars */
     protected $vars;
 
     public function __construct(array $vars)
@@ -41,22 +36,6 @@ trait HandlerTrait
         /** @var HandlerInterface $self */
         $self = $this;
         return $self;
-    }
-
-    /**
-     * @return EasyDB
-     */
-    public function db(): EasyDB
-    {
-        if (!$this->db) {
-            $this->db = Factory::create(
-                $this->settings['database']['dsn'] ?? 'sqlite::memory:',
-                $this->settings['database']['username'] ?? '',
-                $this->settings['database']['password'] ?? '',
-                $this->settings['database']['options'] ?? []
-            );
-        }
-        return $this->db;
     }
 
     /**

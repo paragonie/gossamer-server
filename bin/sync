@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+use ParagonIE\Corner\CornerInterface;
+
+require_once "preamble.php";
+/** @var array $settings */
+
+$gossamer = new ParagonIE\GossamerServer\Gossamer($settings);
+try {
+    $sync = $gossamer->getSynchronizer();
+} catch (\Throwable $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+    echo $ex->getTraceAsString(), PHP_EOL, PHP_EOL;
+    if ($ex instanceof CornerInterface) {
+        echo $ex->getHelpfulMessage(), PHP_EOL;
+        $link = $ex->getSupportLink();
+        if (!empty($link)) {
+            echo 'Support is available at:',  $link, PHP_EOL;
+        }
+    } else {
+        echo "If you are seeing this message, it's likely that you have a configuration issue.\n";
+    }
+    exit(255);
+}
+
+try {
+    $sync->sync();
+} catch (\Throwable $ex) {
+    echo $ex->getMessage(), PHP_EOL;
+    echo $ex->getTraceAsString(), PHP_EOL, PHP_EOL;
+    if ($ex instanceof CornerInterface) {
+        echo $ex->getHelpfulMessage(), PHP_EOL;
+        $link = $ex->getSupportLink();
+        if (!empty($link)) {
+            echo 'Support is available at:',  $link, PHP_EOL;
+        }
+    } else {
+        echo "If you are seeing this message, there was a Gossamer protocol error.\n";
+    }
+    exit(255);
+}
+echo 'Done.', PHP_EOL;

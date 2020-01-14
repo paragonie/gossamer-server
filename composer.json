@@ -33,7 +33,7 @@
     "guzzlehttp/guzzle": "^6",
     "guzzlehttp/psr7": "^1",
     "nikic/fast-route": "^1",
-    "paragonie/libgossamer": "dev-master",
+    "paragonie/libgossamer": "^0|^1",
     "psr/http-message": "^1"
   },
   "require-dev": {

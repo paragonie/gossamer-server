@@ -17,4 +17,5 @@ install:
   - echo "<?php return [];" > local/settings.php
 
 script:
+  - vendor/bin/phpunit
   - vendor/bin/psalm

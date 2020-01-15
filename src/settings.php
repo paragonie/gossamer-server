@@ -13,7 +13,6 @@ $settings = [
 // Load local settings here:
 if (file_exists(GOSSAMER_SERVER_ROOT . '/local/settings.php')) {
     /** @var array $local */
-    /** @psalm-suppress MissingFile */
     $local = require GOSSAMER_SERVER_ROOT . '/local/settings.php';
     $settings = $local + $settings;
 }

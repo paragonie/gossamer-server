@@ -2,6 +2,7 @@
 <?php
 declare(strict_types=1);
 
+use ParagonIE\EasyDB\EasyDB;
 use ParagonIE\EasyDB\Factory;
 
 require_once "preamble.php";
@@ -19,10 +20,8 @@ $db = Factory::create(
     $settings['database']['options'] ?? []
 );
 
-$driver = $db->getDriver();
-$dir = GOSSAMER_SERVER_ROOT . '/vendor/paragonie/libgossamer/sql/' . $driver;
-foreach (glob($dir . '/*.sql') as $sql) {
-    $contents = explode(';', trim(file_get_contents($sql)));
+function runSqlFile(EasyDB $db, string $file) {
+    $contents = explode(';', trim(file_get_contents($file)));
     foreach ($contents as $query) {
         $query = trim($query);
         if (empty($query)) {
@@ -32,5 +31,15 @@ foreach (glob($dir . '/*.sql') as $sql) {
         echo $query, PHP_EOL;
         $db->exec($query);
     }
+}
+
+$driver = $db->getDriver();
+$dir = GOSSAMER_SERVER_ROOT . '/vendor/paragonie/libgossamer/sql/' . $driver;
+foreach (glob($dir . '/*.sql') as $sql) {
+    runSqlFile($db, $sql);
+}
+$dir = GOSSAMER_SERVER_ROOT . '/sql/' . $driver;
+foreach (glob($dir . '/*.sql') as $sql) {
+    runSqlFile($db, $sql);
 }
 echo 'Done.', PHP_EOL;

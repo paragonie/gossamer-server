@@ -99,11 +99,76 @@ class Gossamer
             new RemoteFetch(GOSSAMER_SERVER_ROOT . '/local/certs')
         );
         return new Synchronizer(
-            new PDO($this->db()->getPdo()),
+            $this->getPDOAdapter(),
             $http,
             new Chronicle($http),
             $this->getChronicles(),
             $this->getSuperProvider()
         );
+    }
+
+    /**
+     * Callback for libgossamer, Action class.
+     *
+     * Stores attestations and relates them to specific releases.
+     *
+     * @param string $provider
+     * @param string $package
+     * @param string $release
+     * @param string $attestor (Provider)
+     * @param string $attestation (Verb)
+     * @param array $meta
+     * @param string $hash
+     * @return bool
+     */
+    public function registerAttestation(
+        string $provider,
+        string $package,
+        string $release,
+        string $attestor,
+        string $attestation,
+        array $meta = array(),
+        string $hash = ''
+    ): bool {
+        $db = $this->db();
+        $releaseId = $db->cell(
+            "SELECT r.id
+                FROM gossamer_package_releases r
+                JOIN gossamer_packages p ON r.package = p.id
+                JOIN gossamer_providers u ON p.provider = u.id
+                WHERE u.name = ? AND p.name = ? AND r.version = ?",
+            $provider,
+            $package,
+            $release
+        );
+        if (empty($releaseId)) {
+            return false;
+        }
+        $attestorId = $db->cell(
+            "SELECT id FROM gossamer_providers WHERE name = ?",
+            $attestor
+        );
+        if (empty($attestorId)) {
+            return false;
+        }
+
+        $db->beginTransaction();
+        $db->insert(
+            'gossamer_package_release_attestations',
+            [
+                'release_id' => $releaseId,
+                'attestor' => $attestorId,
+                'attestation' => $attestation,
+                'ledgerhash' => $hash,
+                'metadata' => json_encode($meta)
+            ]
+        );
+        return $db->commit();
+    }
+
+    public function getPDOAdapter(): PDO
+    {
+        return (new PDO($this->db()->getPdo()))
+            ->setAttestCallback([$this, 'registerAttestation']);
     }
 }

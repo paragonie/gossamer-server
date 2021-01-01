@@ -12,10 +12,10 @@ use Psr\Http\Message\{
 };
 
 /**
- * Class PackageReleases
+ * Class Attestations
  * @package ParagonIE\GossamerServer\Handlers
  */
-class PackageReleases implements HandlerInterface
+class Attestations implements HandlerInterface
 {
     use HandlerTrait;
 
@@ -30,6 +30,9 @@ class PackageReleases implements HandlerInterface
 
         /** @var string $package */
         $package = $this->vars['package'] ?? '';
+
+        /** @var string $version */
+        $version = $this->vars['version'] ?? '';
 
         /** @var int $providerId */
         $providerId = $this->db()->cell(
@@ -48,27 +51,36 @@ class PackageReleases implements HandlerInterface
         if (empty($packageId)) {
             return $this->redirect('/gossamer-api/packages/' . $provider);
         }
-        /** @var array $releases */
-        $releases = $this->db()->run(
+        $releaseId = $this->db()->cell(
             "SELECT
-                r.version,
-                r.signature,
-                r.ledgerhash,
-                k.publickey
+                r.id
             FROM gossamer_package_releases r
             JOIN gossamer_packages p ON r.package = p.id
-            JOIN gossamer_providers v ON r.provider = v.id
-            JOIN gossamer_provider_publickeys k ON r.publickey = k.id
-            WHERE p.provider = ? AND r.package = ?   
-                  AND NOT r.revoked
-            ORDER BY id DESC
-            ",
+            WHERE p.provider = ? AND r.package = ? AND r.version = ?",
             $providerId,
-            $packageId
+            $packageId,
+            $version
         );
-        if (empty($releases)) {
+        if (empty($releaseId)) {
+            return $this->redirect('/gossamer-api/releases/' . $provider . '/' . $package);
+        }
+        $attestations = $this->db()->run(
+            "SELECT
+                u.name AS attestor,
+                a.attestation,
+                r.ledgerhash
+            FROM gossamer_package_release_attestations a
+            JOIN gossamer_package_releases r ON a.release_id = r.id
+            JOIN gossamer_providers u ON a.attestor = v.id
+            WHERE a.release_id = ?
+            ORDER BY id DESC",
+            $providerId,
+            $packageId,
+            $releaseId
+        );
+        if (empty($attestations)) {
             $releases = [];
         }
-        return $this->json($releases);
+        return $this->json($attestations);
     }
 }

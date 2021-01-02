@@ -51,6 +51,7 @@ class Attestations implements HandlerInterface
         if (empty($packageId)) {
             return $this->redirect('/gossamer-api/packages/' . $provider);
         }
+        /** @var int $releaseId */
         $releaseId = $this->db()->cell(
             "SELECT
                 r.id
@@ -64,6 +65,7 @@ class Attestations implements HandlerInterface
         if (empty($releaseId)) {
             return $this->redirect('/gossamer-api/releases/' . $provider . '/' . $package);
         }
+        /** @var array<string, mixed> $attestations */
         $attestations = $this->db()->run(
             "SELECT
                 u.name AS attestor,

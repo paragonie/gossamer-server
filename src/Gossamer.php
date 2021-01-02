@@ -56,6 +56,9 @@ class Gossamer
         }
         /** @var array<array-key, array{url: string, public-key: string, trust: string}> $chronicles */
         $chronicles = [];
+        if (!is_array($this->settings['chronicles'])) {
+            throw new \TypeError();
+        }
         /**
          * @var array<array-key, string> $data
          */
@@ -84,7 +87,9 @@ class Gossamer
      */
     protected function getSuperProvider(): string
     {
-        return (string) ($this->settings['super-provider'] ?? '');
+        /** @var string $sp */
+        $sp = $this->settings['super-provider'] ?? '';
+        return $sp;
     }
 
     /**
@@ -131,6 +136,7 @@ class Gossamer
         string $hash = ''
     ): bool {
         $db = $this->db();
+        /** @var int $releaseId */
         $releaseId = $db->cell(
             "SELECT r.id
                 FROM gossamer_package_releases r
@@ -144,6 +150,7 @@ class Gossamer
         if (empty($releaseId)) {
             return false;
         }
+        /** @var int $attestorId */
         $attestorId = $db->cell(
             "SELECT id FROM gossamer_providers WHERE name = ?",
             $attestor
@@ -160,7 +167,7 @@ class Gossamer
                 'attestor' => $attestorId,
                 'attestation' => $attestation,
                 'ledgerhash' => $hash,
-                'metadata' => json_encode($meta)
+                'metadata' => (string) json_encode($meta)
             ]
         );
         return $db->commit();

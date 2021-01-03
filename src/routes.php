@@ -11,7 +11,8 @@ use ParagonIE\GossamerServer\Handlers\{
     PackageReleases,
     ProviderKeys,
     ProviderList,
-    ProviderPackages
+    ProviderPackages,
+    ReleaseInfo
 };
 
 return simpleDispatcher(function (RouteCollector $r) {
@@ -19,6 +20,10 @@ return simpleDispatcher(function (RouteCollector $r) {
         $r->get(
             '/attestations/{provider:[A-Za-z0-9\-_]+}/{package:[A-Za-z0-9\-_]+}/{version:[A-Za-z0-9\-_\.]+}',
             Attestations::class
+        );
+        $r->get(
+            '/release/{provider:[A-Za-z0-9\-_]+}/{package:[A-Za-z0-9\-_]+}/{version:[A-Za-z0-9\-_\.]+}',
+            ReleaseInfo::class
         );
         $r->get('/releases/{provider:[A-Za-z0-9\-_]+}/{package:[A-Za-z0-9\-_]+}', PackageReleases::class);
         $r->get('/packages/{provider:[A-Za-z0-9\-_]+}', ProviderPackages::class);

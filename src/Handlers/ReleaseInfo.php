@@ -12,10 +12,10 @@ use Psr\Http\Message\{
 };
 
 /**
- * Class Attestations
+ * Class ReleaseInfo
  * @package ParagonIE\GossamerServer\Handlers
  */
-class Attestations implements HandlerInterface
+class ReleaseInfo implements HandlerInterface
 {
     use HandlerTrait;
 
@@ -51,38 +51,31 @@ class Attestations implements HandlerInterface
         if (empty($packageId)) {
             return $this->redirect('/gossamer-api/packages/' . $provider);
         }
-        /** @var int $releaseId */
-        $releaseId = $this->db()->cell(
+
+        $releaseInfo = $this->db->run(
             "SELECT
-                r.id
+                v.name AS provider,
+                p.name AS package,
+                r.version,
+                k.publickey,
+                r.signature,
+                r.revoked,
+                r.ledgerhash,
+                r.revokehash,
+                r.metadata
             FROM gossamer_package_releases r
             JOIN gossamer_packages p ON r.package = p.id
-            WHERE p.provider = ? AND r.package = ? AND r.version = ?",
+            JOIN gossamer_providers v ON p.provider = v.id
+            WHERE v.id = ? AND p.id = ? AND r.version = ?
+            ORDER BY r.revoked ASC
+            ",
             $providerId,
             $packageId,
             $version
         );
-        if (empty($releaseId)) {
+        if (empty($releaseInfo)) {
             return $this->redirect('/gossamer-api/releases/' . $provider . '/' . $package);
         }
-        /** @var array<string, mixed> $attestations */
-        $attestations = $this->db()->run(
-            "SELECT
-                u.name AS attestor,
-                a.attestation,
-                r.ledgerhash
-            FROM gossamer_package_release_attestations a
-            JOIN gossamer_package_releases r ON a.release_id = r.id
-            JOIN gossamer_providers u ON a.attestor = v.id
-            WHERE a.release_id = ?
-            ORDER BY id DESC",
-            $providerId,
-            $packageId,
-            $releaseId
-        );
-        if (empty($attestations)) {
-            $attestations = [];
-        }
-        return $this->json($attestations);
+        return $this->json($releaseInfo);
     }
 }

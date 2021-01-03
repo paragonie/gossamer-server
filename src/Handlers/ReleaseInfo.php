@@ -52,7 +52,8 @@ class ReleaseInfo implements HandlerInterface
             return $this->redirect('/gossamer-api/packages/' . $provider);
         }
 
-        $releaseInfo = $this->db->run(
+        /** @var array<array-key, mixed> $releaseInfo */
+        $releaseInfo = $this->db()->run(
             "SELECT
                 v.name AS provider,
                 p.name AS package,

@@ -38,8 +38,4 @@ $dir = GOSSAMER_SERVER_ROOT . '/vendor/paragonie/libgossamer/sql/' . $driver;
 foreach (glob($dir . '/*.sql') as $sql) {
     runSqlFile($db, $sql);
 }
-$dir = GOSSAMER_SERVER_ROOT . '/sql/' . $driver;
-foreach (glob($dir . '/*.sql') as $sql) {
-    runSqlFile($db, $sql);
-}
 echo 'Done.', PHP_EOL;

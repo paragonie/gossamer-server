@@ -173,9 +173,11 @@ class Gossamer
         return $db->commit();
     }
 
+    /**
+     * @return PDO This is the PDO adapter from libgossamer
+     */
     public function getPDOAdapter(): PDO
     {
-        return (new PDO($this->db()->getPdo()))
-            ->setAttestCallback([$this, 'registerAttestation']);
+        return new PDO($this->db()->getPdo());
     }
 }

@@ -43,8 +43,8 @@ trait HandlerTrait
     }
 
     /**
-     * @param array-key $name
-     * @return mixed
+     * @param string $name
+     * @return array<array-key, mixed>|string
      * @throws \Exception
      */
     public function __get($name)

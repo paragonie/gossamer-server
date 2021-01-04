@@ -12,10 +12,10 @@ use Psr\Http\Message\{
 };
 
 /**
- * Class PackageReleases
+ * Class ReleaseInfo
  * @package ParagonIE\GossamerServer\Handlers
  */
-class PackageReleases implements HandlerInterface
+class ReleaseInfo implements HandlerInterface
 {
     use HandlerTrait;
 
@@ -30,6 +30,9 @@ class PackageReleases implements HandlerInterface
 
         /** @var string $package */
         $package = $this->vars['package'] ?? '';
+
+        /** @var string $version */
+        $version = $this->vars['version'] ?? '';
 
         /** @var int $providerId */
         $providerId = $this->db()->cell(
@@ -48,27 +51,32 @@ class PackageReleases implements HandlerInterface
         if (empty($packageId)) {
             return $this->redirect('/gossamer-api/packages/' . $provider);
         }
-        /** @var array $releases */
-        $releases = $this->db()->run(
+
+        /** @var array<array-key, mixed> $releaseInfo */
+        $releaseInfo = $this->db()->run(
             "SELECT
+                v.name AS provider,
+                p.name AS package,
                 r.version,
+                k.publickey,
                 r.signature,
+                r.revoked,
                 r.ledgerhash,
-                k.publickey
+                r.revokehash,
+                r.metadata
             FROM gossamer_package_releases r
             JOIN gossamer_packages p ON r.package = p.id
-            JOIN gossamer_providers v ON r.provider = v.id
-            JOIN gossamer_provider_publickeys k ON r.publickey = k.id
-            WHERE p.provider = ? AND r.package = ?   
-                  AND NOT r.revoked
-            ORDER BY id DESC
+            JOIN gossamer_providers v ON p.provider = v.id
+            WHERE v.id = ? AND p.id = ? AND r.version = ?
+            ORDER BY r.revoked ASC
             ",
             $providerId,
-            $packageId
+            $packageId,
+            $version
         );
-        if (empty($releases)) {
-            $releases = [];
+        if (empty($releaseInfo)) {
+            return $this->redirect('/gossamer-api/releases/' . $provider . '/' . $package);
         }
-        return $this->json($releases);
+        return $this->json($releaseInfo);
     }
 }

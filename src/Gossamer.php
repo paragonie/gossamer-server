@@ -56,6 +56,9 @@ class Gossamer
         }
         /** @var array<array-key, array{url: string, public-key: string, trust: string}> $chronicles */
         $chronicles = [];
+        if (!is_array($this->settings['chronicles'])) {
+            throw new \TypeError();
+        }
         /**
          * @var array<array-key, string> $data
          */
@@ -84,7 +87,9 @@ class Gossamer
      */
     protected function getSuperProvider(): string
     {
-        return (string) ($this->settings['super-provider'] ?? '');
+        /** @var string $sp */
+        $sp = $this->settings['super-provider'] ?? '';
+        return $sp;
     }
 
     /**
@@ -99,11 +104,80 @@ class Gossamer
             new RemoteFetch(GOSSAMER_SERVER_ROOT . '/local/certs')
         );
         return new Synchronizer(
-            new PDO($this->db()->getPdo()),
+            $this->getPDOAdapter(),
             $http,
             new Chronicle($http),
             $this->getChronicles(),
             $this->getSuperProvider()
         );
+    }
+
+    /**
+     * Callback for libgossamer, Action class.
+     *
+     * Stores attestations and relates them to specific releases.
+     *
+     * @param string $provider
+     * @param string $package
+     * @param string $release
+     * @param string $attestor (Provider)
+     * @param string $attestation (Verb)
+     * @param array $meta
+     * @param string $hash
+     * @return bool
+     */
+    public function registerAttestation(
+        string $provider,
+        string $package,
+        string $release,
+        string $attestor,
+        string $attestation,
+        array $meta = array(),
+        string $hash = ''
+    ): bool {
+        $db = $this->db();
+        /** @var int $releaseId */
+        $releaseId = $db->cell(
+            "SELECT r.id
+                FROM gossamer_package_releases r
+                JOIN gossamer_packages p ON r.package = p.id
+                JOIN gossamer_providers u ON p.provider = u.id
+                WHERE u.name = ? AND p.name = ? AND r.version = ?",
+            $provider,
+            $package,
+            $release
+        );
+        if (empty($releaseId)) {
+            return false;
+        }
+        /** @var int $attestorId */
+        $attestorId = $db->cell(
+            "SELECT id FROM gossamer_providers WHERE name = ?",
+            $attestor
+        );
+        if (empty($attestorId)) {
+            return false;
+        }
+
+        $db->beginTransaction();
+        $db->insert(
+            'gossamer_package_release_attestations',
+            [
+                'release_id' => $releaseId,
+                'attestor' => $attestorId,
+                'attestation' => $attestation,
+                'ledgerhash' => $hash,
+                'metadata' => (string) json_encode($meta)
+            ]
+        );
+        return $db->commit();
+    }
+
+    /**
+     * @return PDO This is the PDO adapter from libgossamer
+     */
+    public function getPDOAdapter(): PDO
+    {
+        return new PDO($this->db()->getPdo());
     }
 }

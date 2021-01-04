@@ -13,6 +13,9 @@ use Psr\Http\Message\ResponseInterface;
  */
 class DefaultHandlerTest extends TestCase
 {
+    /**
+     * @covers \ParagonIE\GossamerServer\Handlers\DefaultHandler
+     */
     public function testResponse()
     {
         $handler = new DefaultHandler([]);

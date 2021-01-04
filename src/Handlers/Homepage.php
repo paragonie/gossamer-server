@@ -63,6 +63,23 @@ class Homepage implements HandlerInterface
                         ]
                     ],
                 ],
+                '/gossamer-api/attestations/:provider/:package/:version' => [
+                    'description' => 'Get all of the third-party attestations for a given package release.',
+                    'parameters' => [
+                        ':package' => [
+                            'type' => 'string',
+                            'format' => '^[A-Za-z0-9\-_]+$'
+                        ],
+                        ':provider' => [
+                            'type' => 'string',
+                            'format' => '^[A-Za-z0-9\-_]+$'
+                        ],
+                        ':version' => [
+                            'type' => 'string',
+                            'format' => '^[A-Za-z0-9\-_\.]+$'
+                        ]
+                    ],
+                ],
                 '/gossamer-api' => [
                     'description' => 'Gossamer API index.',
                     'parameters' => [],

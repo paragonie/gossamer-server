@@ -36,9 +36,9 @@ class ProviderKeys implements HandlerInterface
         if (empty($providerId)) {
             return $this->redirect('/gossamer-api/providers');
         }
-        /** @var array $publicKeys */
+        /** @var array{publickey: string, limited: bool, purpose: ?string, ledgerhash: string, metadata: string} $publicKeys */
         $publicKeys = $this->db()->run(
-            "SELECT publickey, ledgerhash, metadata 
+            "SELECT publickey, limited, purpose, ledgerhash, metadata 
              FROM gossamer_provider_publickeys
              WHERE provider = ? AND NOT revoked",
             $providerId

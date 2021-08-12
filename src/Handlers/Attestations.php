@@ -70,7 +70,8 @@ class Attestations implements HandlerInterface
             "SELECT
                 u.name AS attestor,
                 a.attestation,
-                r.ledgerhash
+                r.ledgerhash,
+                r.artifact
             FROM gossamer_package_release_attestations a
             JOIN gossamer_package_releases r ON a.release_id = r.id
             JOIN gossamer_providers u ON a.attestor = v.id

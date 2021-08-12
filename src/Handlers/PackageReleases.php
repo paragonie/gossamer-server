@@ -51,6 +51,7 @@ class PackageReleases implements HandlerInterface
         /** @var array $releases */
         $releases = $this->db()->run(
             "SELECT
+                r.artifact,
                 r.version,
                 r.signature,
                 r.ledgerhash,

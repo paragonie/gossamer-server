@@ -1,10 +1,10 @@
 # Gossamer Server
 
-[![Build Status](https://travis-ci.org/paragonie/gossamer-server.svg?branch=master)](https://travis-ci.org/paragonie/gossamer-server)
+[![Build Status](https://github.com/paragonie/gossamer-server/actions/workflows/ci.yml/badge.svg)](https://github.com/paragonie/gossamer-server/actions)
+[![Static Analysis](https://github.com/paragonie/gossamer-server/actions/workflows/psalm.yml/badge.svg)](https://github.com/paragonie/gossamer-server/actions)
 [![Latest Stable Version](https://poser.pugx.org/paragonie/gossamer-server/v/stable)](https://packagist.org/packages/paragonie/gossamer-server)
 [![Latest Unstable Version](https://poser.pugx.org/paragonie/gossamer-server/v/unstable)](https://packagist.org/packages/paragonie/gossamer-server)
 [![License](https://poser.pugx.org/paragonie/gossamer-server/license)](https://packagist.org/packages/paragonie/gossamer-server)
-[![Downloads](https://img.shields.io/packagist/dt/paragonie/gossamer-server.svg)](https://packagist.org/packages/paragonie/gossamer-server)
 
 Standalone REST API for Gossamer.
 
